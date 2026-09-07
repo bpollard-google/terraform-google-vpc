@@ -1,0 +1,79 @@
+name: Change request
+description: Request a change or report a bug in this Terraform module.
+title: "[request] "
+labels: []
+body:
+  # Pre-filled by the request UI, which knows which module the requester was
+  # looking at. It is a field rather than an implicit "whichever repository
+  # this issue is in" because a request filed centrally has no repository to
+  # infer it from, and the agent parses one format for both.
+  - type: input
+    id: module
+    attributes:
+      label: Module
+      description: >-
+        Pre-filled when this is raised from the module catalogue. Filing by
+        hand from the repository itself? Use the repository name.
+      placeholder: terraform-google-gcs-bucket
+    validations:
+      required: true
+
+  - type: dropdown
+    id: request_type
+    attributes:
+      label: Request type
+      options:
+        - Change or new feature
+        - Bug
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: What do you want to change, and why?
+      description: Describe the outcome you need, not the implementation.
+      placeholder: We need to set a retention policy on buckets holding audit logs.
+    validations:
+      required: true
+
+  - type: textarea
+    id: current_behaviour
+    attributes:
+      label: Current behaviour
+      description: Bugs only. What happens today?
+    validations:
+      required: false
+
+  - type: textarea
+    id: expected_behaviour
+    attributes:
+      label: Expected behaviour
+      description: Bugs only. What should happen instead?
+    validations:
+      required: false
+
+  - type: dropdown
+    id: breaking
+    attributes:
+      label: Is a breaking change acceptable?
+      options:
+        - "No — must stay backwards compatible"
+        - "Yes — a major version bump is fine"
+    validations:
+      required: true
+
+  # Filled automatically by the request UI from whoever is signed in. GitHub
+  # already records the issue author, so this is not that: it is who the change
+  # is *for*, which is the team the agent asks when a requirement is ambiguous
+  # and is often not the person who typed it in.
+  - type: input
+    id: requested_by
+    attributes:
+      label: Requested by
+      description: >-
+        Filled in automatically when this is raised from the module catalogue.
+        Filing by hand? The team or handle to come back to with questions.
+      placeholder: "@acme/data-platform"
+    validations:
+      required: true

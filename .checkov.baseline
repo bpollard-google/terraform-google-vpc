@@ -1,0 +1,21 @@
+{
+    "failed_checks": [
+        {
+            "file": "/main.tf",
+            "findings": [
+                {
+                    "resource": "module.network.google_compute_subnetwork.this[\"app\"]",
+                    "check_ids": [
+                        "CKV_GCP_26"
+                    ]
+                },
+                {
+                    "resource": "module.network.google_compute_subnetwork.this[\"data\"]",
+                    "check_ids": [
+                        "CKV_GCP_26"
+                    ]
+                }
+            ]
+        }
+    ]
+}

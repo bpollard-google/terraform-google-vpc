@@ -1,0 +1,34 @@
+# Managed by the terraformer repo. Do not edit here — edit
+# demo-modules/_shared/nightly.yml.tmpl and re-run demo/push-content.sh.
+name: Nightly
+
+# Schedule and manual dispatch only. This workflow reaches a real GCP sandbox
+# project, so it must never be reachable from a pull request — least of all a
+# fork's.
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  nightly:
+    # id-token: write is granted here, at the caller. A reusable workflow
+    # cannot obtain an OIDC token the caller did not grant it.
+    permissions:
+      contents: read
+      id-token: write
+    # Pinned to a commit SHA, not to the v1 tag. This job holds an OIDC token
+    # good for the sandbox service account, and demo/push-content.sh
+    # force-moves v1 on every sync — at @v1, whoever can move that tag gets
+    # arbitrary code execution with cloud credentials here. The script
+    # substitutes the SHA of the terraform-module-ci commit it pushed
+    # immediately before rendering this file.
+    uses: bpollard-google/terraform-module-ci/.github/workflows/nightly.yml@1331a4e54461b10d2f0e3115075058ed07b361f5
+    with:
+      wif-provider: projects/142429003688/locations/global/workloadIdentityPools/github-actions/providers/github-oidc
+      service-account: tf-module-nightly@bpollard-dev.iam.gserviceaccount.com
+      gcp-project-id: bpollard-dev
+      run-apply: true

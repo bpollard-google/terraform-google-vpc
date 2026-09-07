@@ -1,0 +1,23 @@
+# Managed by the terraformer repo. Do not edit here — edit
+# demo-modules/_shared/ci.yml.tmpl and re-run demo/push-content.sh.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    permissions:
+      contents: read
+      security-events: write
+    # Pinned to a commit SHA, not to the v1 tag. demo/push-content.sh
+    # force-moves v1 on every sync, so a mutable ref here would let anyone who
+    # can move that tag change what runs in this repository. The script
+    # substitutes the SHA of the terraform-module-ci commit it pushed
+    # immediately before rendering this file.
+    uses: bpollard-google/terraform-module-ci/.github/workflows/module-ci.yml@1331a4e54461b10d2f0e3115075058ed07b361f5

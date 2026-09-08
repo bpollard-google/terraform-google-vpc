@@ -20,4 +20,4 @@ jobs:
     # can move that tag change what runs in this repository. The script
     # substitutes the SHA of the terraform-module-ci commit it pushed
     # immediately before rendering this file.
-    uses: bpollard-google/terraform-module-ci/.github/workflows/module-ci.yml@1331a4e54461b10d2f0e3115075058ed07b361f5
+    uses: bpollard-google/terraform-module-ci/.github/workflows/module-ci.yml@4d43a1b143cbdd7ff648126d252f60ceb37de013

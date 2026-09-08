@@ -1,0 +1,47 @@
+# Managed by the terraformer repo. Do not edit here — edit
+# demo-modules/_shared/agent.yml.tmpl and re-run demo/push-content.sh.
+name: Agent
+
+# Issues only. Both halves of the flow are issue events: a new issue is
+# triaged, and a human applying agent:approved starts a build. There is no
+# pull_request trigger and there must never be a pull_request_target one — this
+# repository is public, and the reusable workflow below holds credentials that
+# can start a job which reads a GitHub App private key.
+#
+# `types` is explicit. Without it, `issues` subscribes to every action — edited,
+# reopened, assigned, unlabeled — and each one would start a Cloud Run job.
+on:
+  issues:
+    types: [opened, labeled]
+
+permissions:
+  contents: read
+
+jobs:
+  agent:
+    # id-token: write is granted here, at the caller. A reusable workflow
+    # cannot obtain an OIDC token the caller did not grant it.
+    permissions:
+      contents: read
+      id-token: write
+    # Pinned to a commit SHA, not to the v1 tag. demo/push-content.sh
+    # force-moves v1 on every sync, and this workflow federates into a service
+    # account that can start the agent's Cloud Run Jobs — which run as an
+    # identity holding secretAccessor on the GitHub App private key. At @v1,
+    # whoever can move that tag reaches that key. The script substitutes the
+    # SHA of the terraform-module-ci commit it pushed immediately before
+    # rendering this file.
+    uses: bpollard-google/terraform-module-ci/.github/workflows/agent.yml@4d43a1b143cbdd7ff648126d252f60ceb37de013
+    with:
+      wif-provider: projects/142429003688/locations/global/workloadIdentityPools/github-actions/providers/github-oidc
+      # The invoker service account, which holds run.jobsExecutorWithOverrides
+      # on the two agent jobs and nothing else. Deliberately NOT the nightly's
+      # service account, which holds project-wide compute.networkAdmin and
+      # compute.securityAdmin.
+      service-account: module-agent-invoker@bpollard-dev.iam.gserviceaccount.com
+      gcp-project-id: bpollard-dev
+      # Where the Cloud Run Jobs live. Not the model location — Gemini answers
+      # at `global`, and the jobs carry that themselves.
+      gcp-region: europe-west2
+      triage-job: module-agent-triage
+      build-job: module-agent-build

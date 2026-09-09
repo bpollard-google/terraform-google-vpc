@@ -1,0 +1,54 @@
+# Shipped into every module repository by demo/push-content.sh, alongside
+# .tflint.hcl and the issue templates. The module repositories are generated
+# artefacts; edit this file, not theirs.
+#
+# It exists because of a real failure. `ci/gates.sh` runs `terraform init`
+# inside a checkout, and CI, the nightly and the module agent all commit from a
+# checkout they have just run the gates in. The google provider it downloads is
+# a 116.88 MB binary, and a push carrying it is rejected outright:
+#
+#   remote: error: GH001: Large files detected.
+#   remote: error: File .terraform/providers/.../terraform-provider-google_v6.50.0_x5
+#           is 116.88 MB; this exceeds GitHub's file size limit of 100.00 MB
+#
+# The agent no longer depends on this file — `stage_all` in agent/entrypoint.py
+# excludes `.terraform/` at the staging boundary, because the runner cannot
+# assume anything about a repository's contents. This is the other half: it
+# protects the humans and the workflows, which do a plain `git add`.
+.terraform/
+
+# State never belongs in a module repository. These modules are consumed by
+# other configurations; the only root that applies them keeps its state in GCS.
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# Local input and CLI configuration, which is per-developer by definition.
+*.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# Deliberately NOT ignored: .terraform.lock.hcl.
+#
+# The usual advice — "do not commit a lock file in a shared module" — is about
+# consumers, and it is correct about them: when this module is called by
+# another configuration, only the *caller's* lock file is consulted, so the one
+# here is inert downstream. That makes committing it harmless there, not
+# useless here.
+#
+# Here, the repository is also a root working directory in its own right. `make
+# lint`, `make test`, ci/gates.sh and the nightly all run `terraform init` and
+# `terraform test` at this level, and for those runs the lock is the only thing
+# pinning which provider version was actually exercised and verifying its
+# checksums. Committed, a provider bump is a reviewable diff and CI is
+# reproducible; ignored, every run silently resolves whatever is newest, and
+# the day a provider release breaks a module the failure arrives with no diff
+# to point at. The cost is that the pin can go stale without anyone noticing —
+# which the nightly, re-initialising against the version constraints in
+# versions.tf, is the thing that surfaces.

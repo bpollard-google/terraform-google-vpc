@@ -26,7 +26,7 @@ jobs:
     # arbitrary code execution with cloud credentials here. The script
     # substitutes the SHA of the terraform-module-ci commit it pushed
     # immediately before rendering this file.
-    uses: bpollard-google/terraform-module-ci/.github/workflows/nightly.yml@cda41b8bd6426fcb05402155f515a697984feff9
+    uses: bpollard-google/terraform-module-ci/.github/workflows/nightly.yml@c1c7e6ae7dc8bb08ebbba28ef8818fdc233456d9
     with:
       wif-provider: projects/142429003688/locations/global/workloadIdentityPools/github-actions/providers/github-oidc
       service-account: tf-module-nightly@bpollard-dev.iam.gserviceaccount.com
